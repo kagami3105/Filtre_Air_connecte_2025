@@ -1,0 +1,31 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Détail du filtre</title>
+  <link rel="stylesheet" href="{% static 'dashboard/style.css' %}">
+</head>
+<body>
+  <h1>Détail du filtre</h1>
+  <p><strong>Nom:</strong> {{ filter.name }}</p>
+  <p><strong>Emplacement:</strong> {{ filter.location }}</p>
+  <p><strong>Vitesse:</strong> {{ filter.fan_speed }}</p>
+  <p><strong>État:</strong> {{ filter.status|yesno:"Activé,Désactivé" }}</p>
+  <p><strong>Dernière maintenance:</strong> {{ filter.last_maintenance }}</p>
+  <p><strong>Notes:</strong> {{ filter.notes|default:"-" }}</p>
+
+  <a href="{% url 'dashboard:filter_update' filter.id %}">Modifier</a>
+  {% if delete_mode %}
+  <form method="post" style="margin-top:10px;">
+    {% csrf_token %}
+    <button type="submit" class="danger">Confirmer la suppression</button>
+    <a href="{% url 'dashboard:filter_detail' filter.id %}">Annuler</a>
+  </form>
+  {% else %}
+  <a href="{% url 'dashboard:filter_delete' filter.id %}">Supprimer</a>
+  {% endif %}
+
+  <p><a href="{% url 'dashboard:dashboard' %}">Retour au dashboard</a></p>
+</body>
+</html>

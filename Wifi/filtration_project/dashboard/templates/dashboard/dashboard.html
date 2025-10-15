@@ -1,0 +1,66 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Dashboard Filtration Connectée</title>
+  {% load static %}
+  <link rel="stylesheet" href="{% static 'dashboard/style.css' %}">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="{% static 'dashboard/control.js' %}" defer></script>
+  <script src="{% static 'dashboard/charts.js' %}" defer></script>
+</head>
+<body>
+  <header class="header">
+    <h1>Dashboard Filtration</h1>
+    <nav>
+      <a href="{% url 'dashboard:filter_create' %}">Nouveau filtre</a>
+      <a href="{% url 'dashboard:data_list' %}">Données</a>
+      <a href="{% url 'dashboard:wifi_setup' %}">Configuration Wi‑Fi</a>
+    </nav>
+  </header>
+
+  <main class="grid">
+    {% for filter in filters %}
+    <section class="card" data-id="{{ filter.id }}">
+      <div class="card-header">
+        <h2>{{ filter.name }}</h2>
+        <span class="status {{ filter.status|yesno:'on,off' }}">
+          {{ filter.status|yesno:"Actif,Inactif" }}
+        </span>
+      </div>
+
+      <p><strong>Emplacement:</strong> {{ filter.location }}</p>
+      <p><strong>Vitesse:</strong> <span class="speed">{{ filter.fan_speed }}</span>%</p>
+      <p><strong>Maintenance:</strong> {{ filter.last_maintenance }}</p>
+
+      <div class="controls">
+        <button class="btn btn-toggle">On/Off</button>
+        <button class="btn btn-speed-dec">- Vitesse</button>
+        <button class="btn btn-speed-inc">+ Vitesse</button>
+        <a class="btn btn-detail" href="{% url 'dashboard:filter_detail' filter.id %}">Détails</a>
+      </div>
+
+      <h3>Dernières données</h3>
+      <canvas id="chart-{{ filter.id }}" width="300" height="150"></canvas>
+
+      <ul class="data-list">
+        {% for d in filter.data.all|slice:":5" %}
+          <li>Température: {{ d.temperature }}°C | Humidité: {{ d.humidity }}% | {{ d.timestamp|date:"H:i" }}</li>
+        {% empty %}
+          <li>Aucune donnée reçue</li>
+        {% endfor %}
+      </ul>
+
+      <script type="application/json" id="data-{{ filter.id }}">
+        {
+          "labels": [{% for d in filter.data.all|slice:":5" %}"{{ d.timestamp|date:'H:i' }}"{% if not forloop.last %}, {% endif %}{% endfor %}],
+          "temperature": [{% for d in filter.data.all|slice:":5" %}{{ d.temperature }}{% if not forloop.last %}, {% endif %}{% endfor %}],
+          "humidity": [{% for d in filter.data.all|slice:":5" %}{{ d.humidity }}{% if not forloop.last %}, {% endif %}{% endfor %}]
+        }
+      </script>
+    </section>
+    {% endfor %}
+  </main>
+</body>
+</html>

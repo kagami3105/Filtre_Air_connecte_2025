@@ -1,0 +1,25 @@
+{% load static %}
+<h2>Réseaux Wi-Fi détectés</h2>
+<table>
+  <tr><th>SSID</th><th>RSSI</th><th>Sécurité</th><th>Action</th></tr>
+  {% for net in networks %}
+    <tr>
+      <td>{{ net.ssid }}</td>
+      <td>{{ net.rssi }}</td>
+      <td>{{ net.secure|yesno:"," }}</td>
+      <td>
+        <form method="post" style="display:inline;">
+          {% csrf_token %}
+          <input type="hidden" name="ssid" value="{{ net.ssid }}">
+          {% if net.secure %}
+            <input type="password" name="password" placeholder="Mot de passe" required>
+          {% endif %}
+          <button type="submit">Connecter</button>
+        </form>
+      </td>
+    </tr>
+  {% empty %}
+    <tr><td colspan="4">Aucun réseau détecté</td></tr>
+  {% endfor %}
+</table>
+<p><a href="{% url 'dashboard:wifi_setup' %}">Retour à la configuration Wi‑Fi</a></p>

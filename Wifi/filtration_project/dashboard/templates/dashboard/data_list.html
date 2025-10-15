@@ -1,0 +1,20 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Données reçues</title>
+  <link rel="stylesheet" href="{% static 'dashboard/style.css' %}">
+</head>
+<body>
+  <h1>Données reçues</h1>
+  <ul>
+    {% for d in data %}
+      <li><strong>{{ d.filter.name }}</strong> — Temp: {{ d.temperature }}°C, Humidité: {{ d.humidity }}%, {{ d.timestamp }}</li>
+    {% empty %}
+      <li>Aucune donnée pour l’instant.</li>
+    {% endfor %}
+  </ul>
+  <p><a href="{% url 'dashboard:dashboard' %}">Retour</a></p>
+</body>
+</html>

@@ -1,0 +1,14 @@
+<h2>Données capteurs</h2>
+<table>
+  <tr><th>Type</th><th>Valeur</th><th>Unité</th><th>Horodatage</th></tr>
+  {% for d in data %}
+    <tr>
+      <td>{{ d.sensor_type }}</td>
+      <td>{{ d.value }}</td>
+      <td>{{ d.unit }}</td>
+      <td>{{ d.timestamp|date:"H:i:s d/m/Y" }}</td>
+    </tr>
+  {% empty %}
+    <tr><td colspan="4">Aucune donnée reçue</td></tr>
+  {% endfor %}
+</table>
