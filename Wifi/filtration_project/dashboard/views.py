@@ -19,6 +19,12 @@ import json
 from .models import ScannedNetwork
 from . import api
 
+from django.core.serializers.json import DjangoJSONEncoder
+import json
+from .models import SensorData
+
+
+
 def dashboard_view(request):
     filters = Filter.objects.prefetch_related('data').all()
     return render(request, 'dashboard/dashboard.html', {'filters': filters})
@@ -161,5 +167,24 @@ def receive_sensor_data(request):
     return JsonResponse({"error": "Méthode non autorisée"}, status=405)
 
 def show_sensor_data(request):
-    data = SensorData.objects.order_by('-timestamp')[:20]
-    return render(request, 'dashboard/sensor_data.html', {'data': data})
+    data = SensorData.objects.order_by('timestamp')[:50]
+
+    chart_data = {
+        "labels": [d.timestamp.strftime("%H:%M:%S") for d in data],
+        "values": [d.value for d in data],
+    }
+
+    return render(request, 'dashboard/sensor_data.html', {
+        'data': data,
+        'chart_data': json.dumps(chart_data, cls=DjangoJSONEncoder)
+    })
+
+def sensor_data_json(request):
+    data = SensorData.objects.order_by('timestamp')[:50]
+    chart_data = {
+        "labels": [d.timestamp.strftime("%H:%M:%S") for d in data],
+        "values": [d.value for d in data],
+    }
+    return JsonResponse(chart_data)
+
+

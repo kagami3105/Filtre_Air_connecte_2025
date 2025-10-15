@@ -34,7 +34,12 @@ urlpatterns = [
     path('networks/', views.show_networks, name='show_networks'),
     path('api/networks/', views.receive_networks, name='receive_networks'),
     path('api/sensor/', views.receive_sensor_data, name='receive_sensor_data'),
+    path('sensor-data/', views.show_sensor_data, name='show_sensor_data'),
+    path('sensor-data/json/', views.sensor_data_json, name='sensor_data_json'),
 
 
+    path('api/receive_sensor_data/', views.receive_sensor_data, name='receive_sensor_data'),
+    path('api/sensor_data_json/', views.sensor_data_json, name='sensor_data_json'),
+    path('capteurs/', views.show_sensor_data, name='show_sensor_data'),
 
 ]
