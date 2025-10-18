@@ -20,8 +20,8 @@ from .models import ScannedNetwork
 from . import api
 
 from django.core.serializers.json import DjangoJSONEncoder
-import json
 from .models import SensorData
+from django.db.models import Avg
 
 
 
@@ -166,25 +166,81 @@ def receive_sensor_data(request):
             return JsonResponse({"error": str(e)}, status=500)
     return JsonResponse({"error": "Méthode non autorisée"}, status=405)
 
-def show_sensor_data(request):
-    data = SensorData.objects.order_by('timestamp')[:50]
+# def show_sensor_data(request):
+#     data = SensorData.objects.order_by('timestamp')[:50]
 
-    chart_data = {
-        "labels": [d.timestamp.strftime("%H:%M:%S") for d in data],
-        "values": [d.value for d in data],
-    }
+#     chart_data = {
+#         "labels": [d.timestamp.strftime("%H:%M:%S") for d in data],
+#         "values": [d.value for d in data],
+#     }
 
-    return render(request, 'dashboard/sensor_data.html', {
-        'data': data,
-        'chart_data': json.dumps(chart_data, cls=DjangoJSONEncoder)
-    })
+#     return render(request, 'dashboard/sensor_data.html', {
+#         'data': data,
+#         'chart_data': json.dumps(chart_data, cls=DjangoJSONEncoder)
+#     })
+
+# def sensor_data_json(request):
+#     data = SensorData.objects.order_by('timestamp')[:50]
+#     chart_data = {
+#         "labels": [d.timestamp.strftime("%H:%M:%S") for d in data],
+#         "values": [d.value for d in data],
+#     }
+#     return JsonResponse(chart_data)
+
 
 def sensor_data_json(request):
-    data = SensorData.objects.order_by('timestamp')[:50]
+    data = SensorData.objects.order_by('timestamp')  # toutes les données
     chart_data = {
         "labels": [d.timestamp.strftime("%H:%M:%S") for d in data],
         "values": [d.value for d in data],
+        "rows": [
+            {
+                "sensor_type": d.sensor_type,
+                "value": d.value,
+                "unit": d.unit,
+                "timestamp": d.timestamp.strftime("%H:%M:%S %d/%m/%Y")
+            }
+            for d in data
+        ]
     }
     return JsonResponse(chart_data)
 
 
+# def show_sensor_data(request):
+#     data = SensorData.objects.order_by('timestamp')  # toutes les données
+
+#     chart_data = {
+#         "labels": [d.timestamp.strftime("%H:%M:%S") for d in data],
+#         "values": [d.value for d in data],
+#         "rows": [
+#             {
+#                 "sensor_type": d.sensor_type,
+#                 "value": d.value,
+#                 "unit": d.unit,
+#                 "timestamp": d.timestamp.strftime("%H:%M:%S %d/%m/%Y")
+#             }
+#             for d in data
+#         ]
+#     }
+
+#     return render(request, 'dashboard/sensor_data.html', {
+#         'data': data,
+#         'chart_data': json.dumps(chart_data, cls=DjangoJSONEncoder)
+#     })
+
+def show_sensor_data(request):
+    # On récupère uniquement les données de température
+    data = SensorData.objects.filter(sensor_type='temperature').order_by('-timestamp')[:20]
+
+    # Moyenne des températures
+    avg_temp = SensorData.objects.filter(sensor_type='temperature').aggregate(Avg('value'))['value__avg']
+
+    # Dernière mise à jour
+    last_update = data.first().timestamp if data.exists() else None
+
+    return render(request, 'dashboard/sensor_data.html', {
+        'data': data,
+        'average': avg_temp,
+        'last_update': last_update,
+        'now': timezone.now()
+    })

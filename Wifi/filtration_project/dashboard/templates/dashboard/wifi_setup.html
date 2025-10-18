@@ -4,19 +4,101 @@
 <head>
   <meta charset="UTF-8">
   <title>Configuration Wi‑Fi</title>
-  {% load static %}
   <link rel="stylesheet" href="{% static 'dashboard/style.css' %}">
+  <style>
+    /* --- Styles globaux --- */
+    body {
+      font-family: "Segoe UI", Roboto, sans-serif;
+      background-color: #fff;
+      color: #222;
+      margin: 0;
+      padding: 0;
+    }
+
+    main {
+      max-width: 600px;
+      margin: 2rem auto;
+      padding: 2rem;
+    }
+
+    h1 {
+      text-align: center;
+      color: #1877f2; /* bleu Facebook */
+      font-size: 2rem;
+      margin-bottom: 2rem;
+    }
+
+    h2 {
+      margin-top: 2rem;
+      color: #555;
+    }
+
+    /* --- Carte formulaire --- */
+    .card {
+      background: #f0f2f5;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+      padding: 2rem;
+      margin-bottom: 2rem;
+    }
+
+    form p {
+      margin-bottom: 1rem;
+    }
+
+    form input {
+      width: 100%;
+      padding: 0.5rem 0.8rem;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      box-sizing: border-box;
+    }
+
+    /* --- Boutons --- */
+    .btn {
+      padding: 0.6rem 1.2rem;
+      border-radius: 10px;
+      font-weight: 600;
+      border: none;
+      cursor: pointer;
+      margin-top: 0.5rem;
+      transition: 0.2s;
+      color: white;
+      text-decoration: none;
+      display: inline-block;
+    }
+
+    .btn-save { background-color: #fbc02d; color: #222; } /* jaune */
+    .btn-save:hover { background-color: #fdd54f; }
+
+    .btn-back { background-color: #90a4ae; } /* gris */
+    .btn-back:hover { background-color: #757575; }
+
+    /* --- Responsive --- */
+    @media (max-width: 600px) {
+      main { padding: 1rem; }
+      .btn { width: 100%; }
+    }
+  </style>
 </head>
 <body>
-  <h1>Configuration Wi‑Fi</h1>
+  <main>
+    <h1>Configuration Wi‑Fi</h1>
 
-  <form method="post">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit">Enregistrer</button>
-  </form>
+    <div class="card">
+      <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="btn btn-save">Enregistrer</button>
+      </form>
+    </div>
 
-  <h2>Dernière mise à jour</h2>
-  <p>{{ wifi.last_updated }}</p>
+    <h2>Dernière mise à jour</h2>
+    <p>{{ wifi.last_updated|default:"Aucune mise à jour disponible." }}</p>
+
+    <div style="text-align:center; margin-top:1rem;">
+      <a href="{% url 'dashboard:dashboard' %}" class="btn btn-back">Retour au Dashboard</a>
+    </div>
+  </main>
 </body>
 </html>

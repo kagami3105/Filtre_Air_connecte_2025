@@ -5,27 +5,112 @@
   <meta charset="UTF-8">
   <title>Détail du filtre</title>
   <link rel="stylesheet" href="{% static 'dashboard/style.css' %}">
+  <style>
+    /* --- Styles globaux --- */
+    body {
+      font-family: "Segoe UI", Roboto, sans-serif;
+      background-color: #fff;
+      color: #222;
+      margin: 0;
+      padding: 0;
+    }
+
+    main {
+      max-width: 800px;
+      margin: 2rem auto;
+      padding: 2rem;
+    }
+
+    h1 {
+      text-align: center;
+      color: #e53935;
+      font-size: 2rem;
+      margin-bottom: 2rem;
+    }
+
+    .card {
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+      padding: 2rem;
+      margin-bottom: 2rem;
+    }
+
+    .card p {
+      font-size: 1rem;
+      margin: 0.5rem 0;
+    }
+
+    .card p strong {
+      color: #555;
+    }
+
+    /* --- Boutons --- */
+    .btn {
+      padding: 0.6rem 1.2rem;
+      border-radius: 10px;
+      font-weight: 600;
+      border: none;
+      cursor: pointer;
+      margin-right: 0.5rem;
+      margin-top: 0.5rem;
+      transition: 0.2s;
+      text-decoration: none;
+      display: inline-block;
+      color: white;
+    }
+
+    .btn:hover { opacity: 0.85; }
+
+    .btn-edit { background-color: #fbc02d; color: #222; } /* jaune */
+    .btn-delete { background-color: #e53935; } /* rouge */
+    .btn-back { background-color: #90a4ae; } /* gris */
+    .btn-cancel { background-color: #757575; } /* gris foncé */
+
+    /* --- Formulaire suppression --- */
+    form {
+      margin-top: 1rem;
+    }
+
+    form button {
+      cursor: pointer;
+    }
+
+    /* --- Responsive --- */
+    @media (max-width: 600px) {
+      main { padding: 1rem; }
+      .btn { width: 100%; margin-top: 0.5rem; }
+    }
+  </style>
 </head>
 <body>
-  <h1>Détail du filtre</h1>
-  <p><strong>Nom:</strong> {{ filter.name }}</p>
-  <p><strong>Emplacement:</strong> {{ filter.location }}</p>
-  <p><strong>Vitesse:</strong> {{ filter.fan_speed }}</p>
-  <p><strong>État:</strong> {{ filter.status|yesno:"Activé,Désactivé" }}</p>
-  <p><strong>Dernière maintenance:</strong> {{ filter.last_maintenance }}</p>
-  <p><strong>Notes:</strong> {{ filter.notes|default:"-" }}</p>
+  <main>
+    <h1>Détail du filtre</h1>
 
-  <a href="{% url 'dashboard:filter_update' filter.id %}">Modifier</a>
-  {% if delete_mode %}
-  <form method="post" style="margin-top:10px;">
-    {% csrf_token %}
-    <button type="submit" class="danger">Confirmer la suppression</button>
-    <a href="{% url 'dashboard:filter_detail' filter.id %}">Annuler</a>
-  </form>
-  {% else %}
-  <a href="{% url 'dashboard:filter_delete' filter.id %}">Supprimer</a>
-  {% endif %}
+    <div class="card">
+      <p><strong>Nom :</strong> {{ filter.name }}</p>
+      <p><strong>Emplacement :</strong> {{ filter.location }}</p>
+      <p><strong>Vitesse :</strong> {{ filter.fan_speed }}%</p>
+      <p><strong>État :</strong> {{ filter.status|yesno:"Activé,Désactivé" }}</p>
+      <p><strong>Dernière maintenance :</strong> {{ filter.last_maintenance }}</p>
+      <p><strong>Notes :</strong> {{ filter.notes|default:"-" }}</p>
 
-  <p><a href="{% url 'dashboard:dashboard' %}">Retour au dashboard</a></p>
+      <div class="buttons">
+        <a href="{% url 'dashboard:filter_update' filter.id %}" class="btn btn-edit">Modifier</a>
+
+        {% if delete_mode %}
+        <form method="post" style="display:inline-block;">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-delete">Confirmer la suppression</button>
+          <a href="{% url 'dashboard:filter_detail' filter.id %}" class="btn btn-cancel">Annuler</a>
+        </form>
+        {% else %}
+          <a href="{% url 'dashboard:filter_delete' filter.id %}" class="btn btn-delete">Supprimer</a>
+        {% endif %}
+
+        <a href="{% url 'dashboard:dashboard' %}" class="btn btn-back">Retour au dashboard</a>
+      </div>
+    </div>
+  </main>
 </body>
 </html>

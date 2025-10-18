@@ -5,16 +5,105 @@
   <meta charset="UTF-8">
   <title>Données reçues</title>
   <link rel="stylesheet" href="{% static 'dashboard/style.css' %}">
+  <style>
+    /* --- Styles globaux --- */
+    body {
+      font-family: "Segoe UI", Roboto, sans-serif;
+      background-color: #fff;
+      color: #222;
+      margin: 0;
+      padding: 0;
+    }
+
+    main {
+      max-width: 800px;
+      margin: 2rem auto;
+      padding: 2rem;
+    }
+
+    h1 {
+      text-align: center;
+      color: #1877f2; /* bleu Facebook */
+      font-size: 2rem;
+      margin-bottom: 2rem;
+    }
+
+    .card {
+      background: #f0f2f5;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+      padding: 1.5rem 2rem;
+      margin-bottom: 1.5rem;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 18px rgba(0,0,0,0.1);
+    }
+
+    .card p {
+      margin: 0.4rem 0;
+      font-size: 1rem;
+    }
+
+    .card p strong {
+      color: #1877f2;
+    }
+
+    /* --- Boutons --- */
+    .btn {
+      padding: 0.5rem 1rem;
+      border-radius: 10px;
+      font-weight: 600;
+      border: none;
+      cursor: pointer;
+      margin-right: 0.5rem;
+      margin-top: 0.5rem;
+      transition: 0.2s;
+      text-decoration: none;
+      display: inline-block;
+      color: white;
+    }
+
+    .btn-back { background-color: #90a4ae; } /* gris */
+    .btn-back:hover { background-color: #757575; }
+
+    .btn-delete { background-color: #e53935; } /* rouge */
+    .btn-delete:hover { background-color: #d32f2f; }
+
+    .btn-refresh { background-color: #1877f2; } /* bleu */
+    .btn-refresh:hover { background-color: #4096ff; }
+
+    /* --- Responsive --- */
+    @media (max-width: 600px) {
+      main { padding: 1rem; }
+      .btn { width: 100%; margin-top: 0.5rem; }
+    }
+  </style>
 </head>
 <body>
-  <h1>Données reçues</h1>
-  <ul>
-    {% for d in data %}
-      <li><strong>{{ d.filter.name }}</strong> — Temp: {{ d.temperature }}°C, Humidité: {{ d.humidity }}%, {{ d.timestamp }}</li>
-    {% empty %}
-      <li>Aucune donnée pour l’instant.</li>
-    {% endfor %}
-  </ul>
-  <p><a href="{% url 'dashboard:dashboard' %}">Retour</a></p>
+  <main>
+    <h1>Données reçues</h1>
+
+    {% if data %}
+      {% for d in data %}
+        <div class="card">
+          <p><strong>Filtre :</strong> {{ d.filter.name }}</p>
+          <p><strong>Température :</strong> {{ d.temperature }} °C</p>
+          <p><strong>Humidité :</strong> {{ d.humidity }} %</p>
+          <p><strong>Horodatage :</strong> {{ d.timestamp|date:"H:i d/m/Y" }}</p>
+        </div>
+      {% endfor %}
+    {% else %}
+      <div class="card">
+        <p>Aucune donnée pour l’instant.</p>
+      </div>
+    {% endif %}
+
+    <div style="text-align:center;">
+      <a href="{% url 'dashboard:dashboard' %}" class="btn btn-back">Retour au Dashboard</a>
+      <a href="{% url 'dashboard:data_list' %}" class="btn btn-refresh">Actualiser</a>
+    </div>
+  </main>
 </body>
 </html>

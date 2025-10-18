@@ -5,14 +5,88 @@
   <meta charset="UTF-8">
   <title>{{ title }}</title>
   <link rel="stylesheet" href="{% static 'dashboard/style.css' %}">
+  <style>
+    /* --- Styles globaux --- */
+    body {
+      font-family: "Segoe UI", Roboto, sans-serif;
+      background-color: #fff;
+      color: #222;
+      margin: 0;
+      padding: 0;
+    }
+
+    main {
+      max-width: 600px;
+      margin: 3rem auto;
+      padding: 2rem;
+    }
+
+    h1 {
+      text-align: center;
+      color: #e53935;
+      font-size: 2rem;
+      margin-bottom: 2rem;
+    }
+
+    .card {
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+      padding: 2rem;
+    }
+
+    form p {
+      margin-bottom: 1rem;
+      font-size: 1rem;
+    }
+
+    form input, form select, form textarea {
+      width: 100%;
+      padding: 0.5rem 0.8rem;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      margin-top: 0.3rem;
+      box-sizing: border-box;
+    }
+
+    /* --- Boutons --- */
+    .btn {
+      padding: 0.6rem 1.2rem;
+      border-radius: 10px;
+      font-weight: 600;
+      border: none;
+      cursor: pointer;
+      margin-right: 0.5rem;
+      margin-top: 1rem;
+      text-decoration: none;
+      display: inline-block;
+      transition: 0.2s;
+    }
+
+    .btn:hover { opacity: 0.85; }
+
+    .btn-save { background-color: #fbc02d; color: #222; } /* jaune */
+    .btn-back { background-color: #90a4ae; color: #fff; } /* gris */
+    
+    @media (max-width: 500px) {
+      main { padding: 1rem; margin: 1.5rem auto; }
+      .btn { width: 100%; margin-top: 0.8rem; }
+    }
+  </style>
 </head>
 <body>
-  <h1>{{ title }}</h1>
-  <form method="post">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit">Enregistrer</button>
-    <a href="{% url 'dashboard:dashboard' %}">Retour</a>
-  </form>
+  <main>
+    <div class="card">
+      <h1>{{ title }}</h1>
+      <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <div class="form-buttons">
+          <button type="submit" class="btn btn-save">Enregistrer</button>
+          <a href="{% url 'dashboard:dashboard' %}" class="btn btn-back">Retour</a>
+        </div>
+      </form>
+    </div>
+  </main>
 </body>
 </html>

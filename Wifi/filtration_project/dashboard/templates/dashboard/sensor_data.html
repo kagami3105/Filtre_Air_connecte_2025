@@ -1,96 +1,284 @@
 {% load static %}
 <!DOCTYPE html>
-<html>
+<html lang="fr">
 <head>
-  <title>Données capteurs</title>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <meta charset="UTF-8">
+  <title>Dashboard — Températures</title>
   <link rel="stylesheet" href="{% static 'dashboard/style.css' %}">
-</head>
-<body>
-  <h2>Données capteurs</h2>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body {
+      font-family: "Segoe UI", Roboto, sans-serif;
+      background-color: #f8fafc;
+      color: #333;
+      margin: 0;
+      padding: 0;
+    }
 
-  <canvas id="sensorChart" width="600" height="300"></canvas>
+    header {
+      background: #1877f2;
+      color: white;
+      text-align: center;
+      padding: 2rem 1rem;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 2rem;
+      font-weight: 500;
+    }
+
+    main {
+      max-width: 1000px;
+      margin: 3rem auto;
+      background: white;
+      padding: 3rem 2rem;
+      border-radius: 16px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    }
+
+    h2 {
+      color: #1877f2;
+      font-weight: 500;
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+
+    .chart-container {
+      width: 100%;
+      max-width: 800px;
+      margin: 0 auto 3rem auto;
+    }
+
+    canvas {
+      background: #f0f2f5;
+      border-radius: 12px;
+      padding: 10px;
+    }
+
+    .avg-container {
+      text-align: center;
+      margin-bottom: 3rem;
+    }
+
+    .avg-box {
+      display: inline-block;
+      background-color: #e6f2ff;
+      color: #1877f2;
+      font-size: 3rem;
+      font-weight: 600;
+      padding: 2rem 3rem;
+      border-radius: 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    .unit {
+      font-size: 1.5rem;
+      color: #555;
+    }
+
+    .updated {
+      margin-top: 1rem;
+      color: #666;
+      font-size: 0.95rem;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 2rem;
+    }
+
+    th, td {
+      padding: 1rem 1.5rem;
+      text-align: center;
+    }
+
+    th {
+      background-color: #1877f2;
+      color: white;
+      font-weight: 500;
+      letter-spacing: 0.5px;
+    }
+
+    tr:nth-child(even) {
+      background-color: #f2f6fa;
+    }
+
+    tr:hover {
+      background-color: #e9f3ff;
+      transition: background-color 0.2s ease;
+    }
+
+    .no-data {
+      text-align: center;
+      color: #888;
+      font-style: italic;
+      padding: 2rem 0;
+    }
+
+    footer {
+      text-align: center;
+      margin: 4rem 0 2rem;
+      color: #777;
+      font-size: 0.9rem;
+    }
+
+    @media (max-width: 700px) {
+      main {
+        margin: 1.5rem;
+        padding: 2rem 1.5rem;
+      }
+
+      .avg-box {
+        font-size: 2.2rem;
+        padding: 1.5rem 2rem;
+      }
+
+      table {
+        font-size: 0.9rem;
+      }
+
+      th, td {
+        padding: 0.75rem;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <h1>Dashboard — Températures</h1>
+  </header>
+
+  <main>
+    <!-- Graphe interactif -->
+    <div class="chart-container">
+      <canvas id="avgChart"></canvas>
+    </div>
+
+    <!-- Section moyenne -->
+    <div class="avg-container">
+      <h2>Température moyenne</h2>
+      {% if average %}
+        <div class="avg-box">
+          {{ average|floatformat:2 }} <span class="unit">°C</span>
+        </div>
+        <div class="updated">
+          Dernière mise à jour : {{ last_update|date:"H:i:s d/m/Y" }}
+        </div>
+      {% else %}
+        <p class="updated">Aucune donnée disponible pour le moment.</p>
+      {% endif %}
+    </div>
+
+    <!-- Section tableau -->
+    <h2>Historique des températures</h2>
+    {% if data %}
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Valeur</th>
+          <th>Unité</th>
+          <th>Horodatage</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for d in data %}
+          <tr>
+            <td>{{ d.sensor_type }}</td>
+            <td>{{ d.value }}</td>
+            <td>{{ d.unit }}</td>
+            <td>{{ d.timestamp|date:"H:i:s d/m/Y" }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+      <p class="no-data">Aucune donnée reçue pour le moment.</p>
+    {% endif %}
+  </main>
+
+  <footer>
+    &copy; {{ now|date:"Y" }} Système de filtration intelligente
+  </footer>
 
   <script>
-    const chartData = JSON.parse('{{ chart_data|escapejs }}');
+    // Données réelles du serveur
+    const rawLabels = [
+      {% for d in data %}
+        "{{ d.timestamp|date:'H:i' }}"{% if not forloop.last %}, {% endif %}
+      {% endfor %}
+    ];
 
-    const ctx = document.getElementById('sensorChart').getContext('2d');
-    const sensorChart = new Chart(ctx, {
+    const rawValues = [
+      {% for d in data %}
+        {{ d.value }}{% if not forloop.last %}, {% endif %}
+      {% endfor %}
+    ];
+
+    console.log(rawValues); // Vérifier les valeurs dans la console
+
+    // Axe X : afficher seulement heures multiples de 3
+    const labels = rawLabels.map((label) => {
+      const hour = parseInt(label.split(':')[0]);
+      return hour % 3 === 0 ? label : '';
+    });
+
+    const minY = Math.min(...rawValues) - 2;
+    const maxY = Math.max(...rawValues) + 2;
+
+    const ctx = document.getElementById('avgChart').getContext('2d');
+    const avgChart = new Chart(ctx, {
       type: 'line',
       data: {
-        labels: chartData.labels,
+        labels: labels,
         datasets: [{
           label: 'Température (°C)',
-          data: chartData.values,
-          borderColor: 'rgba(75, 192, 192, 1)',
-          backgroundColor: 'rgba(75, 192, 192, 0.2)',
-          tension: 0.3,
-          fill: true
+          data: rawValues,
+          backgroundColor: 'rgba(24, 119, 242, 0.2)',
+          borderColor: 'rgba(24, 119, 242, 1)',
+          borderWidth: 2,
+          fill: true,
+          tension: 0.4,
+          pointRadius: 4,
+          pointHoverRadius: 6,
+          pointBackgroundColor: 'rgba(24, 119, 242, 0.8)',
+          pointHoverBackgroundColor: 'rgba(24, 119, 242, 1)',
+          pointBorderColor: '#fff'
         }]
       },
       options: {
         responsive: true,
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            mode: 'index',
+            intersect: false,
+            callbacks: {
+              label: function(context) {
+                return context.parsed.y.toFixed(2) + ' °C';
+              }
+            }
+          }
+        },
+        interaction: { mode: 'nearest', intersect: false },
         scales: {
           y: {
-            beginAtZero: false
+            beginAtZero: false,
+            min: minY,
+            max: maxY,
+            title: { display: true, text: 'Température (°C)' }
+          },
+          x: {
+            title: { display: true, text: 'Heure' },
+            ticks: { autoSkip: false, maxRotation: 0, minRotation: 0 }
           }
         }
       }
     });
   </script>
-
-  <table>
-    <tr><th>Type</th><th>Valeur</th><th>Unité</th><th>Horodatage</th></tr>
-    {% for d in data %}
-      <tr>
-        <td>{{ d.sensor_type }}</td>
-        <td>{{ d.value }}</td>
-        <td>{{ d.unit }}</td>
-        <td>{{ d.timestamp|date:"H:i:s d/m/Y" }}</td>
-      </tr>
-    {% empty %}
-      <tr><td colspan="4">Aucune donnée reçue</td></tr>
-    {% endfor %}
-  </table>
-
-  <canvas id="sensorChart" width="600" height="300"></canvas>
-
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script>
-  const ctx = document.getElementById('sensorChart').getContext('2d');
-  const sensorChart = new Chart(ctx, {
-    type: 'line',
-    data: {
-      labels: [],
-      datasets: [{
-        label: 'Température (°C)',
-        data: [],
-        borderColor: 'rgba(75, 192, 192, 1)',
-        backgroundColor: 'rgba(75, 192, 192, 0.2)',
-        tension: 0.3,
-        fill: true
-      }]
-    },
-    options: {
-      responsive: true,
-      scales: {
-        y: { beginAtZero: false }
-      }
-    }
-  });
-
-  function updateChart() {
-    fetch('/sensor-data/json/')
-      .then(response => response.json())
-      .then(data => {
-        sensorChart.data.labels = data.labels;
-        sensorChart.data.datasets[0].data = data.values;
-        sensorChart.update();
-      });
-  }
-
-  updateChart(); // initial
-  setInterval(updateChart, 10000); // toutes les 10 secondes
-</script>
 </body>
 </html>

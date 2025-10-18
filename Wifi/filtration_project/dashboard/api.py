@@ -99,7 +99,7 @@ def mcu_post_status(request):
         # JSON invalide ou mauvaise conversion
         return HttpResponseBadRequest('Invalid payload')
 
-    # On stocke/met à jour un singleton DeviceStatus (id=1)
+    # On stocke et on met à jour un singleton DeviceStatus (id=1)
     status, _ = DeviceStatus.objects.get_or_create(id=1)
     status.connected = connected
     status.ip_address = ip

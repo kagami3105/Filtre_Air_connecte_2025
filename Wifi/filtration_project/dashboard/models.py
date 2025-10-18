@@ -1,9 +1,9 @@
 from django.db import models
 
 class Filter(models.Model):
-    # Nom du filtre (ex: "Salle serveurs")
+    # Nom du filtre (ex: "Filtre TR32-QX")
     name = models.CharField(max_length=100)
-    # Emplacement physique du filtre
+    # Emplacement physique du filtre (ex: "Salon", "Atelier" etc.)
     location = models.CharField(max_length=100)
     # Etat marche/arrêt
     status = models.BooleanField(default=False)   # On/Off
@@ -65,8 +65,13 @@ class ScannedNetwork(models.Model):
         return self.ssid
 
 
+# Classe additionnelle pour stocker des données de capteurs divers
 class SensorData(models.Model):
+    # Type de capteur (ex: "Temperature", "Humidité", "Qualité de l'air", etc.)
     sensor_type = models.CharField(max_length=50)
+    # Valeur mesurée
     value = models.FloatField()
+    # Unité de la mesure (ex: "°C", "%", "ppm", etc.)
     unit = models.CharField(max_length=10, blank=True)
+    # Horodatage automatique à la création
     timestamp = models.DateTimeField(auto_now_add=True)
