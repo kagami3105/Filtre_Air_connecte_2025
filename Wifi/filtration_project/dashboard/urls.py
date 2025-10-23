@@ -47,4 +47,10 @@ urlpatterns = [
     path('api/sensor_data_json/', views.sensor_data_json, name='sensor_data_json'), # Endpoint pour obtenir les données des capteurs en JSON
     path('capteurs/', views.show_sensor_data, name='show_sensor_data'), # Afficher les données des capteurs
 
+    path("api/fan_speed/", views.fan_speed_api, name="fan_speed_api"),
+    path('api/fan_speed/', views.fan_speed, name='fan_speed'),
+
+
+
+
 ]

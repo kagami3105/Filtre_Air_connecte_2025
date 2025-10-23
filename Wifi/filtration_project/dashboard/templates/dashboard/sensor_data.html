@@ -1,4 +1,4 @@
-{% load static %}
+{% comment %} {% load static %}
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -186,15 +186,16 @@
         </tr>
       </thead>
       <tbody>
-        {% for d in data %}
-          <tr>
-            <td>{{ d.sensor_type }}</td>
-            <td>{{ d.value }}</td>
-            <td>{{ d.unit }}</td>
-            <td>{{ d.timestamp|date:"H:i:s d/m/Y" }}</td>
-          </tr>
-        {% endfor %}
-      </tbody>
+  {% for d in data %}
+    <tr>
+      <td>{{ d.sensor_type }}</td>
+      <td>{{ d.value|floatformat:2 }}</td>
+      <td>{{ d.unit }}</td>
+      <td>{{ d.timestamp|date:"H:i:s d/m/Y" }}</td>
+    </tr>
+  {% endfor %}
+</tbody>
+
     </table>
     {% else %}
       <p class="no-data">Aucune donnée reçue pour le moment.</p>
@@ -213,11 +214,12 @@
       {% endfor %}
     ];
 
-    const rawValues = [
-      {% for d in data %}
-        {{ d.value }}{% if not forloop.last %}, {% endif %}
-      {% endfor %}
-    ];
+   const rawValues = [
+  {% for d in data %}
+    {{ d.value|floatformat:2 }}{% if not forloop.last %}, {% endif %}
+  {% endfor %}
+];
+
 
     console.log(rawValues); // Vérifier les valeurs dans la console
 
@@ -275,6 +277,233 @@
           x: {
             title: { display: true, text: 'Heure' },
             ticks: { autoSkip: false, maxRotation: 0, minRotation: 0 }
+          }
+        }
+      }
+    });
+  </script>
+</body>
+</html> {% endcomment %}
+
+{% load static %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Dashboard — Température & Humidité</title>
+  <link rel="stylesheet" href="{% static 'dashboard/style.css' %}">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body {
+      font-family: "Segoe UI", Roboto, sans-serif;
+      background-color: #f8fafc;
+      color: #333;
+      margin: 0;
+      padding: 0;
+    }
+
+    header {
+      background: #1877f2;
+      color: white;
+      text-align: center;
+      padding: 2rem 1rem;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
+
+    main {
+      max-width: 1000px;
+      margin: 3rem auto;
+      background: white;
+      padding: 3rem 2rem;
+      border-radius: 16px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    }
+
+    h2 {
+      color: #1877f2;
+      font-weight: 500;
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+
+    .chart-container {
+      width: 100%;
+      max-width: 800px;
+      margin: 0 auto 3rem auto;
+    }
+
+    canvas {
+      background: #f0f2f5;
+      border-radius: 12px;
+      padding: 10px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 2rem;
+    }
+
+    th, td {
+      padding: 1rem 1.5rem;
+      text-align: center;
+    }
+
+    th {
+      background-color: #1877f2;
+      color: white;
+      font-weight: 500;
+    }
+
+    tr:nth-child(even) { background-color: #f2f6fa; }
+    tr:hover { background-color: #e9f3ff; transition: 0.2s; }
+
+    footer {
+      text-align: center;
+      margin: 4rem 0 2rem;
+      color: #777;
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <h1>Dashboard — Température & Humidité</h1>
+  </header>
+
+  <main>
+    <!-- Graphe -->
+    <div class="chart-container">
+      <canvas id="dualChart"></canvas>
+    </div>
+
+    <!-- Historique -->
+<h2>Historique des mesures</h2>
+{% if data %}
+<table>
+  <thead>
+    <tr>
+      <th>Mesure</th>
+      <th>Horodatage</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for d in data %}
+      <tr>
+        <td>
+          {% if d.sensor_type == 'temperature' %}
+            {{ d.value|floatformat:2 }} °C
+          {% elif d.sensor_type == 'humidity' %}
+             {{ d.value|floatformat:2 }} %
+          {% else %}
+            {{ d.sensor_type }} : {{ d.value }}
+          {% endif %}
+        </td>
+        <td>{{ d.timestamp|date:"H:i:s d/m/Y" }}</td>
+      </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% else %}
+  <p style="text-align:center;color:#777;">Aucune donnée reçue pour le moment.</p>
+{% endif %}
+
+  </main>
+
+  <footer>
+    &copy; {{ now|date:"Y" }} Système de filtration intelligente
+  </footer>
+
+  <script>
+    // Données depuis Django
+    const allLabels = [
+      {% for d in data %}
+        "{{ d.timestamp|date:'H:i' }}"{% if not forloop.last %}, {% endif %}
+      {% endfor %}
+    ];
+
+    const tempData = [
+      {% for d in data %}
+        {% if d.sensor_type == 'temperature' %}
+          {{ d.value|floatformat:2 }},
+        {% endif %}
+      {% endfor %}
+    ];
+
+    const humData = [
+      {% for d in data %}
+        {% if d.sensor_type == 'humidity' %}
+          {{ d.value|floatformat:2 }},
+        {% endif %}
+      {% endfor %}
+    ];
+
+    // Filtrer les étiquettes pour n’en afficher qu’une toutes les 5 heures
+    const filteredLabels = allLabels.map((label, index) => {
+      const hour = parseInt(label.split(':')[0]);
+      // On affiche seulement si l’heure est multiple de 5 (0h, 5h, 10h, 15h, 20h)
+      return (hour % 5 === 0) ? label : '';
+    });
+
+    const ctx = document.getElementById('dualChart').getContext('2d');
+    const dualChart = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: filteredLabels,
+        datasets: [
+          {
+            label: 'Température (°C)',
+            data: tempData,
+            borderColor: 'rgba(255, 99, 132, 1)',
+            backgroundColor: 'rgba(255, 99, 132, 0.2)',
+            tension: 0.4,
+            fill: true,
+            yAxisID: 'y1'
+          },
+          {
+            label: 'Humidité (%)',
+            data: humData,
+            borderColor: 'rgba(54, 162, 235, 1)',
+            backgroundColor: 'rgba(54, 162, 235, 0.2)',
+            tension: 0.4,
+            fill: true,
+            yAxisID: 'y2'
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        interaction: { mode: 'index', intersect: false },
+        stacked: false,
+        plugins: {
+          legend: { position: 'top' },
+          tooltip: {
+            callbacks: {
+              label: function(context) {
+                const unit = context.dataset.label.includes('Température') ? '°C' : '%';
+                return context.parsed.y.toFixed(2) + ' ' + unit;
+              }
+            }
+          }
+        },
+        scales: {
+          x: {
+            title: { display: true, text: 'Heure' },
+            ticks: { autoSkip: false, maxRotation: 0, minRotation: 0 }
+          },
+          y1: {
+            type: 'linear',
+            display: true,
+            position: 'left',
+            title: { display: true, text: 'Température (°C)' }
+          },
+          y2: {
+            type: 'linear',
+            display: true,
+            position: 'right',
+            grid: { drawOnChartArea: false },
+            title: { display: true, text: 'Humidité (%)' }
           }
         }
       }
