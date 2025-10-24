@@ -1,0 +1,136 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Connexion - Filtration Connectée</title>
+  <link rel="stylesheet" href="{% static 'dashboard/style.css' %}">
+  <style>
+    body {
+      font-family: "Segoe UI", Roboto, sans-serif;
+      background-color: #fff;
+      color: #222;
+      margin: 0;
+      padding: 0;
+    }
+
+    main {
+      max-width: 500px;
+      margin: 3rem auto;
+      padding: 2rem;
+    }
+
+    h1 {
+      text-align: center;
+      color: #e53935;
+      font-size: 2rem;
+      margin-bottom: 2rem;
+    }
+
+    .card {
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+      padding: 2rem;
+    }
+
+    form label {
+      display: block;
+      margin-top: 1rem;
+      font-weight: 600;
+    }
+
+    form input {
+      width: 100%;
+      padding: 0.5rem 0.8rem;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      margin-top: 0.3rem;
+      box-sizing: border-box;
+    }
+
+    .btn {
+      padding: 0.6rem 1.2rem;
+      border-radius: 10px;
+      font-weight: 600;
+      border: none;
+      cursor: pointer;
+      margin-top: 1rem;
+      width: 100%;
+      transition: 0.2s;
+      display: inline-block;
+      text-align: center;
+      text-decoration: none;
+      color: white;
+    }
+
+    .btn-login { background-color: #e53935; }
+
+    .btn:hover { opacity: 0.85; }
+
+    .messages {
+      list-style: none;
+      padding: 0;
+      margin-bottom: 1rem;
+    }
+
+    .messages li {
+      background-color: #ffebee;
+      border-left: 4px solid #e53935;
+      padding: 0.5rem 1rem;
+      margin-bottom: 0.5rem;
+      border-radius: 4px;
+      color: #c62828;
+    }
+
+    .extra-links {
+      margin-top: 1rem;
+      text-align: center;
+    }
+
+    .extra-links a {
+      color: #e53935;
+      text-decoration: none;
+      font-weight: 600;
+      margin: 0 0.5rem;
+    }
+
+    .extra-links a:hover { text-decoration: underline; }
+
+    @media (max-width: 500px) {
+      main { padding: 1rem; margin: 2rem auto; }
+      .btn { width: 100%; }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <div class="card">
+      <h1>Connexion</h1>
+
+      {% if messages %}
+        <ul class="messages">
+          {% for message in messages %}
+            <li>{{ message }}</li>
+          {% endfor %}
+        </ul>
+      {% endif %}
+
+      <form method="post">
+        {% csrf_token %}
+        <label for="username">Nom d'utilisateur :</label>
+        <input type="text" name="username" id="username" required>
+
+        <label for="password">Mot de passe :</label>
+        <input type="password" name="password" id="password" required>
+
+        <button type="submit" class="btn btn-login">Se connecter</button>
+      </form>
+
+      <div class="extra-links">
+        <a href="{% url 'password_reset' %}">Mot de passe oublié ?</a>
+      </div>
+    </div>
+  </main>
+</body>
+</html>

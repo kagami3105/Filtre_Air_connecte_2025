@@ -78,3 +78,10 @@ STATICFILES_DIRS = [BASE_DIR / 'dashboard' / 'static']
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 ALLOWED_HOSTS = ["127.0.0.1", "localhost", "192.168.6.1", '192.168.1.23', '192.168.20.220']
+
+# Redirection après login réussi
+LOGIN_REDIRECT_URL = 'dashboard'  # nom de ta vue dashboard
+# Redirection après logout
+LOGOUT_REDIRECT_URL = 'login'     # nom de ta page login
+# Page de login obligatoire pour certaines vues
+LOGIN_URL = 'login'

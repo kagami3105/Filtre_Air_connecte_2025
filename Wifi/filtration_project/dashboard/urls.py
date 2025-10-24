@@ -3,6 +3,9 @@ from django.urls import path
 # On importe les vues et les endpoints API du dashboard
 from . import views, api
 
+from django.contrib.auth import views as auth_views
+
+
 # Namespace pour les URLs du dashboard
 app_name = 'dashboard'
 
@@ -47,4 +50,15 @@ urlpatterns = [
     path('api/sensor_data_json/', views.sensor_data_json, name='sensor_data_json'), # Endpoint pour obtenir les données des capteurs en JSON
     path('capteurs/', views.show_sensor_data, name='show_sensor_data'), # Afficher les données des capteurs
 
+    path("api/fan_speed/", views.fan_speed_api, name="fan_speed_api"),
+    path('api/fan_speed/', views.fan_speed, name='fan_speed'),
+
+    path("", views.dashboard_home, name="index"),
+    path("login/", views.user_login, name="login"),
+    path("logout/", views.user_logout, name="logout"),
+
+    path('login/', auth_views.LoginView.as_view(template_name='registration/login.html'), name='login'),
+    path('logout/', auth_views.LogoutView.as_view(), name='logout'),
+    path('logout/', auth_views.LogoutView.as_view(next_page='login'), name='logout'),
+    
 ]
